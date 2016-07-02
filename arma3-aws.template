@@ -1,0 +1,131 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Metadata": {},
+    "Resources": {
+        "Arma3ServerInstance": {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "SecurityGroups": [
+                    { "Ref" : "Arma3SecurityGroup" }
+                ],
+                "ImageId": {
+                    "Fn::FindInMap": ["RegionMap", {
+                        "Ref": "AWS::Region"
+                    }, "AMI"]
+                },
+                "InstanceType": {
+                    "Ref": "InstanceType"
+                },
+                "KeyName": {
+                    "Ref": "KeyName"
+                },
+                "BlockDeviceMappings": [{
+                    "DeviceName": "/dev/xvda",
+                    "Ebs": {
+                        "VolumeSize": "200"
+                    }
+                }],
+                "EbsOptimized": true,
+                "UserData": {
+                  "Fn::Base64": { "Fn::Join" : [ "\n",
+                    [
+                      "#!/bin/bash",
+                      "export DEBIAN_FRONTEND=noninteractive",
+                      "dpkg --add-architecture i386",
+                      "apt-get update",
+                      "apt-get --yes install tmux mailutils postfix ca-certificates curl file lib32gcc1 libstdc++6 libstdc++6:i386",
+                      "adduser arma3server",
+                      "passwd --delete arma3server",
+                      "sudo -u arma3server -i",
+                      "",
+                      "sudo -u arma3server -i -- wget https://gameservermanagers.com/dl/arma3server",
+                      "sudo -u arma3server -i -- chmod +x arma3server",
+                      { "Fn::Join": [ "", [
+                          "sudo -u arma3server -i -- sed -i 's/steamuser=\"username\"/steamuser=\"",  { "Ref": "SteamUser" }, "\"/' arma3server"
+                        ]]
+                      },
+                      { "Fn::Join": [ "", [
+                          "sudo -u arma3server -i -- sed -i 's/steampass=\"password\"/steampass=\"", { "Ref": "SteamPass" }, "\"/' arma3server"
+                          ]]
+                      },
+                      "yes | sudo -u arma3server -i -- ./arma3server install",
+                      "exit"
+                    ]
+                  ]
+              }
+                }
+            }
+        },
+        "Arma3ServerIP" : {
+          "Type": "AWS::EC2::EIP",
+          "Properties": {
+            "InstanceId": {
+              "Ref": "Arma3ServerInstance"
+            }
+          }
+        },
+        "Arma3SecurityGroup" : {
+          "Type" : "AWS::EC2::SecurityGroup",
+          "Properties": {
+            "GroupDescription": "Arma3 and Steam network rules",
+            "SecurityGroupIngress": [
+              { "IpProtocol" : "udp", "FromPort" : "2302", "ToPort" : "2305", "CidrIp" : "0.0.0.0/0"},
+              { "IpProtocol" : "udp", "FromPort" : "27000", "ToPort" : "27015", "CidrIp" : "0.0.0.0/0"},
+              { "IpProtocol" : "udp", "FromPort" : "27015", "ToPort" : "27030", "CidrIp" : "0.0.0.0/0"},
+              { "IpProtocol" : "udp", "FromPort" : "27014", "ToPort" : "27050", "CidrIp" : "0.0.0.0/0"},
+              { "IpProtocol" : "udp", "FromPort" : "4380", "ToPort" : "4380", "CidrIp" : "0.0.0.0/0"},
+              { "IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "CidrIp" : "0.0.0.0/0"},
+              { "IpProtocol" : "tcp", "FromPort" : "2344", "ToPort" : "2344", "CidrIp" : "81.0.236.111/32"},
+              { "IpProtocol" : "udp", "FromPort" : "2344", "ToPort" : "2344", "CidrIp" : "81.0.236.111/32"},
+              { "IpProtocol" : "tcp", "FromPort" : "2345", "ToPort" : "2345", "CidrIp" : "81.0.236.111/32"},
+              { "IpProtocol" : "udp", "FromPort" : "2302", "ToPort" : "2305", "CidrIp" : "0.0.0.0/0"},
+              { "IpProtocol" : "udp", "FromPort" : "2303", "ToPort" : "2303", "CidrIp" : "0.0.0.0/0"},
+              { "IpProtocol" : "udp", "FromPort" : "2304", "ToPort" : "2304", "CidrIp" : "0.0.0.0/0"}
+            ]
+          }
+        }
+    },
+    "Parameters": {
+        "InstanceType": {
+            "Description": "EC2 instance type",
+            "Type": "String",
+            "Default": "c4.xlarge",
+            "AllowedValues": [
+                "c4.xlarge",
+                "c4.2xlarge",
+                "c4.4xlarge",
+                "c4.8xlarge"
+            ],
+            "ConstraintDescription": "must be a valid EC2 instance type."
+        },
+        "KeyName": {
+            "Description": "Name of an EC2 KeyPair to enable SSH access to the instance.",
+            "Type": "AWS::EC2::KeyPair::KeyName",
+            "ConstraintDescription": "must be the name of an existing EC2 KeyPair."
+        },
+        "SteamUser": {
+          "Description": "Steam username to use when setting up steam",
+          "Type": "String",
+          "MinLength": 1
+        },
+        "SteamPass": {
+          "Description": "Steam password to use when setting up steam",
+          "Type": "String",
+          "NoEcho": true,
+          "MinLength": 1
+        }
+    },
+    "Mappings": {
+        "RegionMap": {
+            "us-east-1": {
+                "AMI": "ami-c8bda8a2"
+            },
+            "us-west-1": {
+                "AMI": "ami-45374b25"
+            },
+            "us-west-2": {
+                "AMI": "ami-98e114f8"
+            }
+        }
+    }
+}
