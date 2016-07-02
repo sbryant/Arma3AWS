@@ -1,0 +1,52 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Metadata": {},
+    "Resources": {
+        "Arma3ServerInstance": {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "SecurityGroupIds": [
+                    "sg-14aa3772"
+                ],
+                "ImageId": { "Fn::FindInMap" : [ "RegionMap", { "Ref" : "AWS::Region" }, "AMI"] },
+                "InstanceType": { "Ref" : "InstanceType" }
+            }
+        },
+        "Arma3IPAssociation": {
+            "Type": "AWS::EC2::EIPAssociation",
+            "Properties": {
+                "InstanceId": {
+                    "Ref": "Arma3ServerInstance"
+                },
+                "EIP": "52.25.235.52"
+            }
+        }
+    },
+    "Parameters": {
+        "InstanceType": {
+            "Description": "EC2 instance type",
+            "Type": "String",
+            "Default": "c4.large",
+            "AllowedValues": [
+                "c4.large",
+                "c4.xlarge",
+                "c4.2xlarge",
+                "c4.4xlarge",
+                "c4.8xlarge"
+            ],
+            "ConstraintDescription": "must be a valid EC2 instance type."
+        },
+        "KeyName": {
+            "Description": "Name of an EC2 KeyPair to enable SSH access to the instance.",
+            "Type": "AWS::EC2::KeyPair::KeyName",
+            "ConstraintDescription": "must be the name of an existing EC2 KeyPair."
+        }
+    },
+    "Mappings": {
+      "RegionMap": {
+        "us-east-1": { "AMI": "ami-c8bda8a2" },
+        "us-west-1": { "AMI" : "ami-45374b25" },
+        "us-west-2": { "AMI" : "ami-98e114f8" }
+    }
+  }
+}
