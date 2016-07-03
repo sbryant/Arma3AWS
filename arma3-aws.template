@@ -54,9 +54,16 @@
                       "sudo -u arma3server -i xmlstarlet sel -N x='http://s3.amazonaws.com/doc/2006-03-01/' -t -v '//x:Key/text()' /home/arma3server/modlist.xml | grep '.zip$' | xargs -P4 -n1 -IFILE sudo -u arma3server -i curl -s 'https://arma-cloud-mods.s3.amazonaws.com/FILE' -o'/home/arma3server/FILE'",
                       "sudo -u arma3server -i find . -type f -name '*.zip' | sed 's/.zip//' | xargs -n1 -P4 -IFILE sudo -u arma3server -i unzip -L 'FILE.zip' -d 'serverfiles/FILE'",
                       "sudo -u arma3server -i find serverfiles -type f -name '*.bikey' | xargs -P4 -n1 -IFILE sudo -u arma3server -i cp FILE serverfiles/keys/",
-                      "sudo -u arma3server -i bash -c 'cd serverfiles; tar -xf @task_force_radio/store/userconfig.tar'",
-                      "sudo -u arma3server -i cp serverfiles/\\@ace/optionals/*.pbo serverfiles/\\@ace/addons",
-                      "sudo -u arma3server -i cp -R serverfiles/\\@ace/optionals/userconfig/* serverfiles/",
+                      "sudo -u arma3server -i bash -c 'cd serverfiles; tar -xf @task_force_radio/store/userconfig.tar; cp @ace3/optionals/*.pbo serverfiles/@ace3/addons/'; cp -R serverfiles/@ace3/optionals/userconfig/* serverfiles/userconfig/",
+                      "sudo -u arma3server -i sed -i 's/hostname = \"arma3server\"/hostname = \"Arrakis - Stuff\"/' serverfiles/cfg/arma3-server.server.cfg",
+                      { "Fn::Join": ["", [
+                        "sudo -u arma3server -i sed -i 's/\/\/password = \"password\"/password = \"", { "Ref" : "ServerPass" } ,"\"/' serverfiles/cfg/arma3-server.server.cfg"
+                        ]]
+                      },
+                      { "Fn::Join": ["", [
+                        "sudo -u arma3server -i sed -i 's/passwordAdmin = \"arma3adminpass\"/passwordAdmin = \"", { "Ref" : "ServerAdminPass" }, "\"/' serverfiles/cfg/arma3-server.server.cfg"
+                        ]]
+                      },
                       "exit"
                     ]
                   ]
@@ -118,6 +125,18 @@
         },
         "SteamPass": {
           "Description": "Steam password to use when setting up steam",
+          "Type": "String",
+          "NoEcho": true,
+          "MinLength": 1
+        },
+        "ServerPass": {
+          "Description": "Server password to use when setting up Arma3 config",
+          "Type": "String",
+          "NoEcho": true,
+          "MinLength": 1
+        },
+        "ServerAdminPass": {
+          "Description": "Server admin password to use when setting up A4ma3 config",
           "Type": "String",
           "NoEcho": true,
           "MinLength": 1
