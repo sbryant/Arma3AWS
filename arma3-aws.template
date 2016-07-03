@@ -46,7 +46,7 @@
                           "sudo -u arma3server -i -- sed -i 's/steampass=\"password\"/steampass=\"", { "Ref": "SteamPass" }, "\"/' /home/arma3server/arma3server"
                           ]]
                       },
-                      "sudo -u arma3server -- sed -i 's/mods=\"\"/mods=\"curator;heli;kart;mark;@cba_a3;@cup_terrains_maps;@cup_terrains_core;@iraqi_syrian_conflict;@rhs_usf3;@rhs_afrf3;@cup;@cup_units;@cup_vehicles;@cup_weapons;@CUP_Weapons_ACE_compat;@CUP_Vehicles_ACE_compat;@mas_nato_rus_sf_veh;@murshun_cigs;@ewk_cigs;@beard;@ctab;@task_force_radio;@realarmor;@sthud_a3;@ace3;@AliveServer;@alive;@asr_ai3;\"/' /home/arma3server/arma3server",
+                      "sudo -u arma3server -- sed -i 's/mods=\"\"/mods=\"curator;heli;kart;mark;@cba_a3;@cup_terrains_maps;@cup_terrains_core;@iraqi_syrian_conflict;@rhs_gref;@rhs_usf3;@rhs_afrf3;@cup;@cup_units;@cup_vehicles;@cup_weapons;@CUP_Weapons_ACE_compat;@CUP_Vehicles_ACE_compat;@mas_nato_rus_sf_veh;@murshun_cigs;@ewk_cigs;@beard;@ctab;@task_force_radio;@realarmor;@sthud_a3;@ace3;@AliveServer;@alive;@asr_ai3;\"/' /home/arma3server/arma3server",
                       "sudo -u arma3server -- sed -i \"s/\\${mods}/'\\${mods}'/\" /home/arma3server/arma3server",
                       "sudo -u arma3server -- sed -i \"s/\\${servermods}/'\\${servermods}'/\" /home/arma3server/arma3server",
                       "yes | sudo -u arma3server -i -- /home/arma3server/arma3server install",
