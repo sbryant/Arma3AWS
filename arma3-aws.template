@@ -53,6 +53,7 @@
                       "sudo -u arma3server -i curl -s https://arma-cloud-mods.s3.amazonaws.com/ -o modlist.xml",
                       "sudo -u arma3server -i xmlstarlet sel -N x='http://s3.amazonaws.com/doc/2006-03-01/' -t -v '//x:Key/text()' modlist.xml | grep '.zip$' | xargs -n1 -IFILE sudo -u arma3server -i curl -s 'https://arma-cloud-mods.s3.amazonaws.com/FILE' -o'FILE'",
                       "sudo -u arma3server -i find . -type f -name '*.zip' | sed 's/.zip//' | xargs -n1 -IFILE sudo -u arma3server -i unzip -L 'FILE.zip' -d 'serverfiles/FILE'",
+                      "sudo -u arma3server -i find serverfiles -type -f '*.bikey' | xargs -P4 -n1 -IFILE sudo -u arma3server -i cp FILE serverfiles/keys/",
                       "exit"
                     ]
                   ]
