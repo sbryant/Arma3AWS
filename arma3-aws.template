@@ -33,22 +33,37 @@
                       "export DEBIAN_FRONTEND=noninteractive",
                       "dpkg --add-architecture i386",
                       "apt-get update",
-                      "apt-get --yes install tmux mailutils postfix ca-certificates curl file lib32gcc1 libstdc++6 libstdc++6:i386",
+                      "apt-get --yes install tmux mailutils postfix ca-certificates curl file lib32gcc1 libstdc++6 libstdc++6:i386 xmlstarlet unzip",
                       "adduser arma3server",
                       "passwd --delete arma3server",
-                      "sudo -u arma3server -i",
-                      "",
-                      "sudo -u arma3server -i -- wget https://gameservermanagers.com/dl/arma3server",
-                      "sudo -u arma3server -i -- chmod +x arma3server",
+                      "sudo -u arma3server -i -- curl -L https://gameservermanagers.com/dl/arma3server -o /home/arma3server/arma3server",
+                      "sudo -u arma3server -i -- chmod +x /home/arma3server/arma3server",
                       { "Fn::Join": [ "", [
-                          "sudo -u arma3server -i -- sed -i 's/steamuser=\"username\"/steamuser=\"",  { "Ref": "SteamUser" }, "\"/' arma3server"
+                          "sudo -u arma3server -i -- sed -i 's/steamuser=\"username\"/steamuser=\"",  { "Ref": "SteamUser" }, "\"/' /home/arma3server/arma3server"
                         ]]
                       },
                       { "Fn::Join": [ "", [
-                          "sudo -u arma3server -i -- sed -i 's/steampass=\"password\"/steampass=\"", { "Ref": "SteamPass" }, "\"/' arma3server"
+                          "sudo -u arma3server -i -- sed -i 's/steampass=\"password\"/steampass=\"", { "Ref": "SteamPass" }, "\"/' /home/arma3server/arma3server"
                           ]]
                       },
-                      "yes | sudo -u arma3server -i -- ./arma3server install",
+                      "sudo -u arma3server -- sed -i 's/mods=\"\"/mods=\"curator;heli;kart;mark;@cba_a3;@cup_terrains_maps;@cup_terrains_core;@iraqi_syrian_conflict;@rhs_gref;@rhs_usf3;@rhs_afrf3;@cup;@cup_units;@cup_vehicles;@cup_weapons;@CUP_Weapons_ACE_compat;@CUP_Vehicles_ACE_compat;@mas_nato_rus_sf_veh;@murshun_cigs;@ewk_cigs;@beard;@ctab;@task_force_radio;@realarmor;@sthud_a3;@ace3;@AliveServer;@alive;@asr_ai3;\"/' /home/arma3server/arma3server",
+                      "sudo -u arma3server -- sed -i \"s/\\${mods}/'\\${mods}'/\" /home/arma3server/arma3server",
+                      "sudo -u arma3server -- sed -i \"s/\\${servermods}/'\\${servermods}'/\" /home/arma3server/arma3server",
+                      "yes | sudo -u arma3server -i -- /home/arma3server/arma3server install",
+                      "sudo -u arma3server curl -L https://arma-cloud-mods.s3.amazonaws.com/ -o /home/arma3server/modlist.xml",
+                      "sudo -u arma3server -i xmlstarlet sel -N x='http://s3.amazonaws.com/doc/2006-03-01/' -t -v '//x:Key/text()' /home/arma3server/modlist.xml | grep '.zip$' | xargs -P4 -n1 -IFILE sudo -u arma3server -i curl -s 'https://arma-cloud-mods.s3.amazonaws.com/FILE' -o'/home/arma3server/FILE'",
+                      "sudo -u arma3server -i find . -type f -name '*.zip' | sed 's/.zip//' | xargs -n1 -P2 -IFILE sudo -u arma3server -i unzip -L 'FILE.zip' -d 'serverfiles/FILE'",
+                      "sudo -u arma3server -i find serverfiles -type f -name '*.bikey' | xargs -P4 -n1 -IFILE sudo -u arma3server -i cp FILE serverfiles/keys/",
+                      "sudo -u arma3server -i bash -c 'cd serverfiles; tar -xf @task_force_radio/store/userconfig.tar; cp @ace3/optionals/*.pbo @ace3/addons/; cp -R @ace3/optionals/userconfig/* userconfig/",
+                      "sudo -u arma3server -i sed -i 's/hostname = \"arma3server\"/hostname = \"Arrakis - Stuff\"/' serverfiles/cfg/arma3-server.server.cfg",
+                      { "Fn::Join": ["", [
+                        "sudo -u arma3server -i sed -i 's/\\/\\/password = \"arma3pass\"/password = \"", { "Ref" : "ServerPass" } ,"\"/' serverfiles/cfg/arma3-server.server.cfg"
+                        ]]
+                      },
+                      { "Fn::Join": ["", [
+                        "sudo -u arma3server -i sed -i 's/passwordAdmin = \"arma3adminpass\"/passwordAdmin = \"", { "Ref" : "ServerAdminPass" }, "\"/' serverfiles/cfg/arma3-server.server.cfg"
+                        ]]
+                      },
                       "exit"
                     ]
                   ]
@@ -110,6 +125,18 @@
         },
         "SteamPass": {
           "Description": "Steam password to use when setting up steam",
+          "Type": "String",
+          "NoEcho": true,
+          "MinLength": 1
+        },
+        "ServerPass": {
+          "Description": "Server password to use when setting up Arma3 config",
+          "Type": "String",
+          "NoEcho": true,
+          "MinLength": 1
+        },
+        "ServerAdminPass": {
+          "Description": "Server admin password to use when setting up A4ma3 config",
           "Type": "String",
           "NoEcho": true,
           "MinLength": 1
