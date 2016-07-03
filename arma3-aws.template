@@ -33,7 +33,7 @@
                       "export DEBIAN_FRONTEND=noninteractive",
                       "dpkg --add-architecture i386",
                       "apt-get update",
-                      "apt-get --yes install tmux mailutils postfix ca-certificates curl file lib32gcc1 libstdc++6 libstdc++6:i386",
+                      "apt-get --yes install tmux mailutils postfix ca-certificates curl file lib32gcc1 libstdc++6 libstdc++6:i386 xmlstarlet unzip",
                       "adduser arma3server",
                       "passwd --delete arma3server",
                       "sudo -u arma3server -i",
@@ -48,7 +48,11 @@
                           "sudo -u arma3server -i -- sed -i 's/steampass=\"password\"/steampass=\"", { "Ref": "SteamPass" }, "\"/' arma3server"
                           ]]
                       },
+                      "sudo -u arma3server -i -- sed -i 's/mods=\"\"/mods=\"curator;heli;kart;mark;@cba_a3;@cup_terrains_maps;@cup_terrains_core;@iraqi_syrian_conflict;@rhs_usf3;@rhs_afrf3;@cup;@cup_units;@cup_vehicles;@cup_weapons;@CUP_Weapons_ACE_compat;@CUP_Vehicles_ACE_compat;@mas_nato_rus_sf_veh;@murshun_cigs;@ewk_cigs;@beard;@ctab;@task_force_radio;@realarmor;@sthud_a3;@ace3;@AliveServer;@alive;@asr_ai3;\"/' arma3server",
                       "yes | sudo -u arma3server -i -- ./arma3server install",
+                      "sudo -u arma3server -i curl -s https://arma-cloud-mods.s3.amazonaws.com/ -o modlist.xml",
+                      "sudo -u arma3server -i xmlstarlet sel -N x='http://s3.amazonaws.com/doc/2006-03-01/' -t -v '//x:Key/text()' modlist.xml | grep '.zip$' | xargs -n1 -IFILE sudo -u arma3server -i curl -s 'https://arma-cloud-mods.s3.amazonaws.com/FILE' -o'FILE'",
+                      "sudo -u arma3server -i find . -type f -name '*.zip' | sed 's/.zip//' | xargs -n1 -IFILE sudo -u arma3server -i unzip -L 'FILE.zip' -d 'serverfiles/FILE'",
                       "exit"
                     ]
                   ]
